@@ -8,6 +8,7 @@ use App\Models\Order;
 class AdminOrders extends Component
 {
     public $orders;
+    public $flashOrderId = null;
 
     public function mount()
     {
@@ -16,9 +17,15 @@ class AdminOrders extends Component
 
     public function loadOrders()
     {
+        $latestOrder = Order::latest()->first();
+        $this->flashOrderId = $latestOrder->id;
+
         $this->orders = Order::with(['table', 'orderItems.menuItem'])
             ->orderBy('created_at', 'desc')
             ->get();
+
+        // Trigger a browser event
+        $this->dispatch('new-order-received');
     }
 
     public function updateStatus($orderId, $status)
