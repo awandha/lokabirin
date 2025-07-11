@@ -12,11 +12,21 @@
             <p>Table: {{ $order->table->name }}</p>
             <p>Status: {{ $order->status }}</p>
             <p>Total: Rp {{ $order->total_price }}</p>
-            <ul>
+            <ul class="mt-2 space-y-1">
                 @foreach ($order->orderItems as $item)
-                    <li>{{ $item->menuItem->name }} x {{ $item->quantity }}</li>
+                    <li class="text-gray-800">
+                        <span class="font-medium">{{ $item->menuItem->name }}</span>
+                        <span class="text-sm text-gray-600">x {{ $item->quantity }}</span>
+
+                        @if ($item->note)
+                            <div class="ml-4 mt-1 text-sm border-l-4 border-yellow-400 pl-2 italic">
+                                Note: {{ $item->note }}
+                            </div>
+                        @endif
+                    </li>
                 @endforeach
             </ul>
+
 
             <form wire:submit.prevent="updateStatus({{ $order->id }}, $event.target.status.value)">
                 <select name="status">
