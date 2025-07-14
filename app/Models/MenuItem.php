@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class MenuItem extends Model
 {
-    protected $fillable = ['name', 'description', 'price', 'is_available'];
+    protected $fillable = ['name', 'description', 'price', 'is_available', 'image_url'];
 
     public function orderItems()
     {
