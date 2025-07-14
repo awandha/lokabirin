@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\CustomerOrderController;
 use App\Http\Controllers\AdminOrderController;
 use App\Http\Controllers\AdminTableController;
+use App\Http\Controllers\AdminReportController;
 use App\Models\Post;
 use Illuminate\Support\Facades\Log;
 
@@ -65,6 +66,10 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/kitchen', function () {
         return view('kitchen.index');
     });
+    Route::get('/admin/reports', function () {
+        return view('admin.reports');
+    });
+    Route::get('/admin/reports/export', [AdminReportController::class, 'export'])->name('admin.reports.export');
 });
 
 Route::get('/dashboard', function () {
