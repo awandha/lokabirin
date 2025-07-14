@@ -7,6 +7,7 @@ use App\Models\Table;
 use App\Models\MenuItem;
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Models\Category;
 use App\Events\OrderPlaced;
 
 class CustomerCart extends Component
@@ -15,12 +16,35 @@ class CustomerCart extends Component
     public $menuItems;
     public $cart = [];
     public $notes = [];
+    public $categories;
+    public $activeCategory;
+
+    public function loadMenuItems()
+    {
+        $query = MenuItem::where('is_available', true);
+
+        if ($this->activeCategory && $this->activeCategory !== 'all') {
+            $query->where('category_id', $this->activeCategory);
+        }
+
+        $this->menuItems = $query->get();
+    }
 
     public function mount($tableCode)
     {
         $this->table = Table::where('table_code', $tableCode)->firstOrFail();
-        $this->menuItems = MenuItem::where('is_available', true)->get();
+        $this->categories = Category::all();
+        $this->activeCategory = 'all';
+
+        $this->loadMenuItems();
     }
+
+    public function setCategory($categoryId)
+    {
+        $this->activeCategory = $categoryId;
+        $this->loadMenuItems();
+    }
+
 
     public function addToCart($menuItemId)
     {

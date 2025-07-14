@@ -17,6 +17,24 @@
     <div class="py-6">
         <h1 class="text-2xl font-bold mb-4">Welcome to {{ $table->name }}</h1>
 
+        <div class="sticky top-0 bg-white z-10 flex space-x-2 mb-4 overflow-x-auto border-b py-2">
+            <button
+                wire:click="setCategory('all')"
+                class="px-4 py-2 rounded whitespace-nowrap 
+                    {{ $activeCategory === 'all' ? 'bg-blue-600 text-white' : 'bg-gray-200 hover:bg-gray-300' }}">
+                All
+            </button>
+
+            @foreach ($categories as $category)
+                <button
+                    wire:click="setCategory({{ $category->id }})"
+                    class="px-4 py-2 rounded whitespace-nowrap
+                        {{ $activeCategory == $category->id ? 'bg-blue-600 text-white' : 'bg-gray-200 hover:bg-gray-300' }}">
+                    {{ $category->name }}
+                </button>
+            @endforeach
+        </div>
+
         {{-- ✅ Responsive grid --}}
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
             @foreach ($menuItems as $item)
