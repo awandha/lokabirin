@@ -29,6 +29,13 @@ class KitchenOrders extends Component
         $this->loadOrders();
     }
 
+    public function markInProgress($orderId)
+    {
+        $order = Order::findOrFail($orderId);
+        $order->update(['status' => 'in_progress']);
+        $this->loadOrders();
+    }
+
     protected function getListeners()
     {
         return [
