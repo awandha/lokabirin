@@ -56,6 +56,15 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/admin/orders/{order}/status', [AdminOrderController::class, 'updateStatus']);
     Route::get('/admin/tables', [AdminTableController::class, 'index']);
     Route::get('/admin/tables/qr-pdf', [AdminTableController::class, 'downloadQrPdf']);
+    Route::get('/admin/menu-items', function () {
+        return view('admin.menu-items');
+    });
+    Route::get('/admin/menu', function () {
+        return view('admin.menu');
+    });
+    Route::get('/kitchen', function () {
+        return view('kitchen.index');
+    });
 });
 
 Route::get('/dashboard', function () {
