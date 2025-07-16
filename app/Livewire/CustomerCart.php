@@ -13,62 +13,43 @@ use App\Events\OrderPlaced;
 class CustomerCart extends Component
 {
     public $table;
-    public $menuItems;
     public $cart = [];
     public $notes = [];
     public $categories;
-    public $activeCategory;
+    public $activeCategory = 'all';
+    public $search = '';
 
-    public function loadMenuItems()
+    public function searchMenu()
     {
-        $query = MenuItem::where('is_available', true);
-
-        if ($this->activeCategory && $this->activeCategory !== 'all') {
-            $query->where('category_id', $this->activeCategory);
-        }
-
-        $this->menuItems = $query->get();
+        // No logic — the render() will handle it automatically
     }
 
     public function mount($tableCode)
     {
         $this->table = Table::where('table_code', $tableCode)->firstOrFail();
         $this->categories = Category::all();
-        $this->activeCategory = 'all';
-
-        $this->loadMenuItems();
     }
 
     public function setCategory($categoryId)
     {
         $this->activeCategory = $categoryId;
-        $this->loadMenuItems();
     }
-
 
     public function addToCart($menuItemId)
     {
-        if (isset($this->cart[$menuItemId])) {
-            $this->cart[$menuItemId]++;
-        } else {
-            $this->cart[$menuItemId] = 1;
-        }
+        $this->cart[$menuItemId] = ($this->cart[$menuItemId] ?? 0) + 1;
     }
 
     public function removeFromCart($menuItemId)
     {
-        if (isset($this->cart[$menuItemId])) {
-            unset($this->cart[$menuItemId]);
-        }
+        unset($this->cart[$menuItemId]);
     }
 
     public function updateQuantity($menuItemId, $quantity)
     {
-        if ($quantity <= 0) {
-            unset($this->cart[$menuItemId]);
-        } else {
-            $this->cart[$menuItemId] = $quantity;
-        }
+        $quantity <= 0
+            ? $this->removeFromCart($menuItemId)
+            : $this->cart[$menuItemId] = $quantity;
     }
 
     public function placeOrder()
@@ -84,7 +65,6 @@ class CustomerCart extends Component
         ]);
 
         $total = 0;
-
         foreach ($this->cart as $itemId => $quantity) {
             $menuItem = MenuItem::findOrFail($itemId);
             $total += $menuItem->price * $quantity;
@@ -101,13 +81,25 @@ class CustomerCart extends Component
 
         $this->cart = [];
         $this->notes = [];
-
-        session()->flash('success', 'Order placed! Thank you.');
         event(new OrderPlaced($order));
+        session()->flash('success', 'Order placed! Thank you.');
     }
 
     public function render()
     {
-        return view('livewire.customer-cart');
+        $query = MenuItem::query()->where('is_available', true);
+
+        if ($this->activeCategory !== 'all') {
+            $query->where('category_id', $this->activeCategory);
+        }
+
+        if ($this->search) {
+            $query->where('name', 'like', '%' . $this->search . '%');
+        }
+
+        return view('livewire.customer-cart', [
+            'menuItems' => $query->get(),
+            'allItems' => MenuItem::where('is_available', true)->get(),
+        ]);
     }
 }
