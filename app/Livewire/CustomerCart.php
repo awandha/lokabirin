@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use Livewire\Component;
+use Livewire\WithPagination;
 use App\Models\Table;
 use App\Models\MenuItem;
 use App\Models\Order;
@@ -12,17 +13,23 @@ use App\Events\OrderPlaced;
 
 class CustomerCart extends Component
 {
+    use WithPagination;
+
     public $table;
     public $cart = [];
     public $notes = [];
+
     public $categories;
     public $activeCategory = 'all';
     public $search = '';
 
-    public function searchMenu()
-    {
-        // No logic — the render() will handle it automatically
-    }
+    protected $paginationTheme = 'tailwind';
+
+    protected $queryString = [
+        'search' => ['except' => ''],
+        'activeCategory' => ['except' => 'all'],
+        'page' => ['except' => 1],
+    ];
 
     public function mount($tableCode)
     {
@@ -30,9 +37,15 @@ class CustomerCart extends Component
         $this->categories = Category::all();
     }
 
+    public function updatingSearch()
+    {
+        $this->resetPage();
+    }
+
     public function setCategory($categoryId)
     {
         $this->activeCategory = $categoryId;
+        $this->resetPage(); // ✅ Fix: reset page when changing category!
     }
 
     public function addToCart($menuItemId)
@@ -47,9 +60,11 @@ class CustomerCart extends Component
 
     public function updateQuantity($menuItemId, $quantity)
     {
-        $quantity <= 0
-            ? $this->removeFromCart($menuItemId)
-            : $this->cart[$menuItemId] = $quantity;
+        if ($quantity <= 0) {
+            $this->removeFromCart($menuItemId);
+        } else {
+            $this->cart[$menuItemId] = $quantity;
+        }
     }
 
     public function placeOrder()
@@ -65,6 +80,7 @@ class CustomerCart extends Component
         ]);
 
         $total = 0;
+
         foreach ($this->cart as $itemId => $quantity) {
             $menuItem = MenuItem::findOrFail($itemId);
             $total += $menuItem->price * $quantity;
@@ -81,13 +97,13 @@ class CustomerCart extends Component
 
         $this->cart = [];
         $this->notes = [];
-        event(new OrderPlaced($order));
         session()->flash('success', 'Order placed! Thank you.');
+        event(new OrderPlaced($order));
     }
 
     public function render()
     {
-        $query = MenuItem::query()->where('is_available', true);
+        $query = MenuItem::where('is_available', true);
 
         if ($this->activeCategory !== 'all') {
             $query->where('category_id', $this->activeCategory);
@@ -97,9 +113,11 @@ class CustomerCart extends Component
             $query->where('name', 'like', '%' . $this->search . '%');
         }
 
+        $menuItems = $query->paginate(9);
+
         return view('livewire.customer-cart', [
-            'menuItems' => $query->get(),
-            'allItems' => MenuItem::where('is_available', true)->get(),
+            'menuItems' => $menuItems,
+            'allItems' => MenuItem::all(),
         ]);
     }
 }
