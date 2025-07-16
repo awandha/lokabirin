@@ -1,100 +1,165 @@
-<div class="space-y-6">
+<div class="max-w-5xl mx-auto p-4 space-y-6">
 
-    {{-- ✅ Notifications --}}
+    {{-- Flash Messages --}}
     @if (session()->has('success'))
-        <div class="p-4 bg-green-200 text-green-900 rounded">
+        <div class="p-4 bg-green-100 text-green-800 rounded">
             {{ session('success') }}
         </div>
     @endif
 
     @if (session()->has('error'))
-        <div class="p-4 bg-red-200 text-red-900 rounded">
+        <div class="p-4 bg-red-100 text-red-800 rounded">
             {{ session('error') }}
         </div>
     @endif
 
-    {{-- ✅ Main container --}}
-    <div class="py-6">
-        <h1 class="text-2xl font-bold mb-4">Welcome to {{ $table->name }}</h1>
+    {{-- ✅ Banner with overlay --}}
+    <div class="relative w-full overflow-hidden rounded-lg mb-4 h-48 md:h-64">
+        <img
+            src="{{ asset('storage/images/customer-banner.png') }}"
+            alt="Welcome Banner"
+            class="absolute inset-0 w-full h-full object-cover"
+        >
 
-        {{-- ✅ Responsive grid --}}
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-            @foreach ($menuItems as $item)
-                <div class="border rounded-lg overflow-hidden shadow hover:shadow-xl transition flex flex-col h-full bg-white">
-                    {{-- ✅ Image --}}
-                    @if ($item->image_url)
-                        <img src="{{ asset('storage/menu_images/' . $item->image_url) }}"
-                            alt="{{ $item->name }}"
-                            class="w-full h-48 object-cover">
-                    @else
-                        <div class="w-full h-48 bg-gray-200 flex items-center justify-center text-gray-500">
-                            No Image
-                        </div>
-                    @endif
+        {{-- Dark overlay --}}
+        <div class="absolute inset-0 bg-black bg-opacity-50"></div>
 
-                    {{-- ✅ Card content --}}
-                    <div class="flex flex-col flex-1 p-4">
-                        <div class="flex-1">
-                            <h2 class="text-lg font-bold mb-1 text-gray-800">{{ $item->name }}</h2>
-                            <p class="text-sm text-gray-600 mb-2">Rp {{ number_format($item->price, 0, ',', '.') }}</p>
-                        </div>
+        {{-- Text on banner --}}
+        <div class="relative z-10 flex items-center justify-center h-full">
+            <h1 class="text-white text-2xl md:text-4xl font-bold text-center px-4">
+                Welcome to {{ $table->name }}
+            </h1>
+        </div>
+    </div>
 
-                        <button wire:click="addToCart({{ $item->id }})"
-                                class="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 w-full text-center">
-                            Add to Cart
-                        </button>
-                    </div>
-                </div>
+    {{-- ✅ Sticky Categories --}}
+    <div class="sticky top-0 bg-white z-10 border-b">
+        <div class="flex overflow-x-auto gap-2 py-2 px-1 scrollbar-hide">
+            <button
+                wire:click="setCategory('all')"
+                class="flex-shrink-0 px-3 py-1 rounded border whitespace-nowrap
+                    {{ $activeCategory === 'all' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700' }}">
+                All
+            </button>
+
+            @foreach ($categories as $category)
+                <button
+                    wire:click="setCategory({{ $category->id }})"
+                    class="flex-shrink-0 px-3 py-1 rounded border whitespace-nowrap
+                        {{ $activeCategory === $category->id ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700' }}">
+                    {{ $category->name }}
+                </button>
             @endforeach
         </div>
     </div>
 
+    {{-- ✅ Search --}}
+    <div class="mb-4">
+        <form wire:submit.prevent="searchMenu" class="flex gap-2">
+            <input
+                type="text"
+                wire:model.defer="search"
+                placeholder="Search menu..."
+                class="flex-1 border rounded px-4 py-2"
+            >
+            <button
+                type="submit"
+                class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                Search
+            </button>
+        </form>
+    </div>
+
+    {{-- ✅ Menu Items --}}
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+        @forelse ($menuItems as $item)
+            <div class="border rounded overflow-hidden shadow hover:shadow-lg transition flex flex-col">
+                @if ($item->image_url)
+                    <img
+                        src="{{ asset('storage/menu_images/' . $item->image_url) }}"
+                        alt="{{ $item->name }}"
+                        class="w-full h-40 object-cover"
+                    >
+                @else
+                    <div class="w-full h-40 flex items-center justify-center bg-gray-100 text-gray-500">
+                        No Image
+                    </div>
+                @endif
+
+                <div class="p-4 flex flex-col flex-grow">
+                    <h2 class="text-lg font-bold mb-1">{{ $item->name }}</h2>
+                    <p class="text-gray-600 mb-2">Rp {{ number_format($item->price, 0, ',', '.') }}</p>
+                    <button
+                        wire:click="addToCart({{ $item->id }})"
+                        class="mt-auto px-3 py-2 bg-green-600 text-white rounded hover:bg-green-700 text-center w-full">
+                        Add to Cart
+                    </button>
+                </div>
+            </div>
+        @empty
+            <p class="col-span-full text-center text-gray-500">No menu items found.</p>
+        @endforelse
+    </div>
+
     {{-- ✅ Cart --}}
-    <div class="mt-6">
+    <div class="mt-8">
         <h2 class="text-xl font-bold mb-2">Your Cart</h2>
 
         @if (empty($cart))
-            <p>Your cart is empty.</p>
+            <p class="text-gray-500">Your cart is empty.</p>
         @else
-            <div class="space-y-4">
-                @foreach ($cart as $itemId => $quantity)
-                    @php $item = $menuItems->find($itemId); @endphp
-                    <div class="border rounded-lg p-4 shadow flex flex-col space-y-2">
-                        <div class="flex justify-between items-center">
-                            <h3 class="text-lg font-semibold">{{ $item->name }}</h3>
-                            <button wire:click="removeFromCart({{ $itemId }})"
-                                    class="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700">
-                                Remove
-                            </button>
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-medium mb-1">Quantity</label>
-                            <input type="number"
-                                wire:change="updateQuantity({{ $itemId }}, $event.target.value)"
-                                value="{{ $quantity }}"
-                                min="1"
-                                class="border rounded px-2 py-1 w-full">
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-medium mb-1">Note</label>
-                            <input type="text"
-                                wire:model="notes.{{ $itemId }}"
-                                placeholder="Optional note"
-                                class="border rounded px-2 py-1 w-full">
-                        </div>
-                    </div>
-                @endforeach
+            <div class="overflow-x-auto">
+                <table class="w-full border text-sm">
+                    <thead class="bg-gray-100">
+                        <tr>
+                            <th class="px-3 py-2 border">Item</th>
+                            <th class="px-3 py-2 border">Qty</th>
+                            <th class="px-3 py-2 border">Note</th>
+                            <th class="px-3 py-2 border">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($cart as $itemId => $quantity)
+                            @php $item = $allItems->find($itemId); @endphp
+                            <tr>
+                                <td class="border px-3 py-2">{{ $item->name }}</td>
+                                <td class="border px-3 py-2">
+                                    <input
+                                        type="number"
+                                        wire:change="updateQuantity({{ $itemId }}, $event.target.value)"
+                                        value="{{ $quantity }}"
+                                        min="1"
+                                        class="border rounded px-2 py-1 w-20"
+                                    >
+                                </td>
+                                <td class="border px-3 py-2">
+                                    <input
+                                        type="text"
+                                        wire:model="notes.{{ $itemId }}"
+                                        placeholder="Optional note"
+                                        class="border rounded px-2 py-1 w-full"
+                                    >
+                                </td>
+                                <td class="border px-3 py-2">
+                                    <button
+                                        wire:click="removeFromCart({{ $itemId }})"
+                                        class="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700">
+                                        Remove
+                                    </button>
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
             </div>
 
             <div class="mt-4">
-                <button wire:click="placeOrder"
-                        class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 w-full sm:w-auto">
+                <button
+                    wire:click="placeOrder"
+                    class="px-5 py-3 bg-blue-600 text-white rounded hover:bg-blue-700">
                     Place Order
                 </button>
             </div>
         @endif
     </div>
-
 </div>
