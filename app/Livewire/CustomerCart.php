@@ -51,6 +51,11 @@ class CustomerCart extends Component
     public function addToCart($menuItemId)
     {
         $this->cart[$menuItemId] = ($this->cart[$menuItemId] ?? 0) + 1;
+
+        $item = \App\Models\MenuItem::find($menuItemId);
+        $this->dispatch('cart-updated', [
+            'message' => "{$item->name} added to cart!"
+        ]);
     }
 
     public function removeFromCart($menuItemId)

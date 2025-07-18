@@ -53,9 +53,10 @@
         <form wire:submit.prevent class="flex gap-2">
             <input
                 type="text"
-                wire:model.lazy="search"
+                wire:model.defer="search"
                 placeholder="Search menu..."
                 class="flex-1 border rounded px-4 py-2"
+                autofocus
             >
             <button
                 type="submit"
@@ -68,7 +69,7 @@
     {{-- ✅ Menu Items --}}
     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
         @forelse ($menuItems as $item)
-            <div class="border rounded-lg overflow-hidden shadow hover:shadow-xl hover:scale-105 transition-transform duration-200 flex flex-col">
+            <div class="border rounded-lg overflow-hidden shadow hover:shadow-xl hover:scale-105 transition-transform duration-300 flex flex-col">
                 @if ($item->image_url)
                     <img
                         src="{{ asset('storage/menu_images/' . $item->image_url) }}"
@@ -108,7 +109,7 @@
             <p class="text-gray-500">Your cart is empty.</p>
         @else
             <div class="overflow-x-auto">
-                <table class="w-full border text-sm">
+                <table class="w-full border text-sm rounded-lg overflow-hidden shadow">
                     <thead class="bg-gray-100">
                         <tr>
                             <th class="px-3 py-2 border">Item</th>
@@ -142,7 +143,7 @@
                                 <td class="border px-3 py-2">
                                     <button
                                         wire:click="removeFromCart({{ $itemId }})"
-                                        class="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700">
+                                        class="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 transition">
                                         Remove
                                     </button>
                                 </td>
@@ -163,3 +164,13 @@
     </div>
 
 </div>
+
+<script>
+    window.addEventListener('cart-updated', event => {
+        const toast = document.createElement('div');
+        toast.textContent = event.detail.message;
+        toast.className = 'fixed bottom-5 right-5 bg-green-600 text-white px-4 py-2 rounded shadow z-50 animate-bounce';
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 2500);
+    });
+</script>
