@@ -51,6 +51,11 @@ class CustomerCart extends Component
     public function addToCart($menuItemId)
     {
         $this->cart[$menuItemId] = ($this->cart[$menuItemId] ?? 0) + 1;
+
+        $item = \App\Models\MenuItem::find($menuItemId);
+        $this->dispatch('cart-updated', [
+            'message' => "{$item->name} added to cart!"
+        ]);
     }
 
     public function removeFromCart($menuItemId)
@@ -97,8 +102,10 @@ class CustomerCart extends Component
 
         $this->cart = [];
         $this->notes = [];
-        session()->flash('success', 'Order placed! Thank you.');
         event(new OrderPlaced($order));
+
+        // ✅ Redirect to thank you page
+        return redirect()->route('customer.thank-you', ['table_code' => $this->table->table_code]);
     }
 
     public function render()

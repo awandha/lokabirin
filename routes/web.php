@@ -8,6 +8,7 @@ use App\Http\Controllers\AdminTableController;
 use App\Http\Controllers\AdminReportController;
 use App\Models\Post;
 use Illuminate\Support\Facades\Log;
+use App\Http\Controllers\Admin\MenuController;
 
 // Test refactor code
 Route::get('/test-original', function () {
@@ -51,6 +52,11 @@ Route::get('/order/{table_code}', function ($table_code) {
 });
 // Route::get('/order/{table_code}', [CustomerOrderController::class, 'showMenu']);
 Route::post('/order/{table_code}', [CustomerOrderController::class, 'placeOrder']);
+// Thank you page after placing an order
+Route::get('/order/{table_code}/thank-you', function ($table_code) {
+    $table = \App\Models\Table::where('table_code', $table_code)->firstOrFail();
+    return view('customer.thank-you', ['table' => $table]);
+})->name('customer.thank-you');
 
 Route::middleware(['auth'])->group(function () {
     Route::get('/admin/orders', [AdminOrderController::class, 'index']);
@@ -70,6 +76,7 @@ Route::middleware(['auth'])->group(function () {
         return view('admin.reports');
     });
     Route::get('/admin/reports/export', [AdminReportController::class, 'export'])->name('admin.reports.export');
+    Route::get('/admin/menus', [MenuController::class, 'index'])->name('admin.menus.index');
 });
 
 Route::get('/dashboard', function () {
