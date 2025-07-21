@@ -52,6 +52,11 @@ Route::get('/order/{table_code}', function ($table_code) {
 });
 // Route::get('/order/{table_code}', [CustomerOrderController::class, 'showMenu']);
 Route::post('/order/{table_code}', [CustomerOrderController::class, 'placeOrder']);
+// Thank you page after placing an order
+Route::get('/order/{table_code}/thank-you', function ($table_code) {
+    $table = \App\Models\Table::where('table_code', $table_code)->firstOrFail();
+    return view('customer.thank-you', ['table' => $table]);
+})->name('customer.thank-you');
 
 Route::middleware(['auth'])->group(function () {
     Route::get('/admin/orders', [AdminOrderController::class, 'index']);

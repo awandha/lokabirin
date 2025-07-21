@@ -102,8 +102,10 @@ class CustomerCart extends Component
 
         $this->cart = [];
         $this->notes = [];
-        session()->flash('success', 'Order placed! Thank you.');
         event(new OrderPlaced($order));
+
+        // ✅ Redirect to thank you page
+        return redirect()->route('customer.thank-you', ['table_code' => $this->table->table_code]);
     }
 
     public function render()

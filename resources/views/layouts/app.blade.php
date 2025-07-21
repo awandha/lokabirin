@@ -1,19 +1,23 @@
+<!-- resources/views/layouts/app.blade.php -->
 <!DOCTYPE html>
-<html lang="en">
-<head>    
+<html lang="en" class="h-full bg-gray-50">
+<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Lokabirin</title>
-    @vite('resources/css/app.css')    
+
+    @vite('resources/css/app.css')
     @livewireStyles
     @laravelPWA
 </head>
-<body>
-    <div class="container mx-auto p-4">
+<body class="min-h-full flex flex-col text-gray-800">
+    <main class="flex-1 max-w-7xl mx-auto w-full p-6">
         @yield('content')
-    </div>
+    </main>
+
     @vite('resources/js/app.js')
     @livewireScripts
+
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', function () {
