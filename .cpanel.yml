@@ -1,0 +1,5 @@
+---
+deployment:
+tasks:
+- export DEPLOYPATH=/home/awdp3382/public_html/lokabirin
+- /bin/cp -r * $DEPLOYPATH
