@@ -39,6 +39,8 @@
         </div>
     @endforeach
 
+    {{ $orders->links() }}
+
     <audio id="newOrderSound" src="{{ asset('sounds/notification.mp3') }}" preload="auto"></audio>
 
     <style>

@@ -3,11 +3,13 @@
 namespace App\Livewire;
 
 use Livewire\Component;
+use Livewire\WithPagination;
 use App\Models\Order;
 
 class AdminOrders extends Component
 {
-    public $orders;
+    use WithPagination;
+
     public $flashOrderId = null;
 
     public function mount()
@@ -19,13 +21,6 @@ class AdminOrders extends Component
     {
         $latestOrder = Order::latest()->first();
         $this->flashOrderId = $latestOrder->id;
-
-        $this->orders = Order::with(['table', 'orderItems.menuItem'])
-            ->orderBy('created_at', 'desc')
-            ->get();
-
-        // Trigger a browser event
-        $this->dispatch('new-order-received');
     }
 
     public function updateStatus($orderId, $status)
@@ -38,7 +33,9 @@ class AdminOrders extends Component
     public function render()
     {
         return view('livewire.admin-orders', [
-            'orders' => $this->orders,
+            'orders' => Order::with(['table', 'orderItems.menuItem'])
+                ->orderBy('created_at', 'desc')
+                ->paginate(10), // 10 orders per page
         ]);
     }
 
