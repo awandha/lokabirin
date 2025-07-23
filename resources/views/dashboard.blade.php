@@ -34,7 +34,7 @@
         </a>
 
         {{-- Menus --}}
-        <a href="/admin/menus"
+        <a href="/admin/menu"
            class="flex items-center p-6 bg-purple-600 text-white rounded-xl shadow hover:bg-purple-700 transition transform hover:scale-105">
             <svg xmlns="http://www.w3.org/2000/svg"
                  class="h-8 w-8 mr-4" fill="none"

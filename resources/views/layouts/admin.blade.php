@@ -36,8 +36,8 @@
                 class="{{ request()->is('admin/tables') ? 'text-blue-600 font-bold' : 'text-gray-700 hover:text-blue-600' }}">
                     Tables
                 </a>
-                <a href="/admin/menus"
-                class="{{ request()->is('admin/menus') ? 'text-blue-600 font-bold' : 'text-gray-700 hover:text-blue-600' }}">
+                <a href="/admin/menu"
+                class="{{ request()->is('admin/menu') ? 'text-blue-600 font-bold' : 'text-gray-700 hover:text-blue-600' }}">
                     Menu Items
                 </a>
                 <a href="/admin/reports"
@@ -75,8 +75,8 @@
                 class="{{ request()->is('admin/tables') ? 'text-blue-600 font-bold' : 'text-gray-700 hover:text-blue-600' }}">
                     Tables
                 </a>
-                <a href="/admin/menus"
-                class="{{ request()->is('admin/menus') ? 'text-blue-600 font-bold' : 'text-gray-700 hover:text-blue-600' }}">
+                <a href="/admin/menu"
+                class="{{ request()->is('admin/menu') ? 'text-blue-600 font-bold' : 'text-gray-700 hover:text-blue-600' }}">
                     Menu Items
                 </a>
                 <a href="/admin/reports"
